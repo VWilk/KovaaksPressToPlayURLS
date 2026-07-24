@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KovaaK’s Deep Link Generator</title>
+  <style>
+    /* ─── Reset & Base ─── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, #0b0e14 0%, #1a1f2a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: #e8edf5;
+    }
+
+    .card {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(30, 36, 48, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      transition: box-shadow 0.2s;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.2rem;
+      background: linear-gradient(135deg, #f0b3a0, #d68bff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .sub {
+      font-size: 0.95rem;
+      color: #9aa7b9;
+      margin-bottom: 2rem;
+      border-left: 3px solid #d68bff;
+      padding-left: 0.8rem;
+    }
+
+    /* ─── Form ─── */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #c8d0de;
+    }
+
+    .input-group input[type="text"] {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid #3a4355;
+      border-radius: 1.2rem;
+      background: #1e2533;
+      color: #f0f4fc;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    .input-group input[type="text"]:focus {
+      border-color: #b388ff;
+      box-shadow: 0 0 0 3px rgba(179, 136, 255, 0.25);
+    }
+
+    .input-group input[type="text"]::placeholder {
+      color: #6b7a90;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin: 0.5rem 0 1.2rem;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 1.2rem;
+      height: 1.2rem;
+      accent-color: #b388ff;
+      cursor: pointer;
+    }
+
+    .checkbox-row label {
+      font-size: 0.95rem;
+      color: #c8d0de;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.9rem 2rem;
+      border: none;
+      border-radius: 2rem;
+      background: linear-gradient(135deg, #7c4dff, #b388ff);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 20px rgba(123, 77, 255, 0.35);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ─── Output ─── */
+    .output-area {
+      margin-top: 2rem;
+      background: #141a24;
+      border-radius: 1.2rem;
+      padding: 1.5rem 1.2rem;
+      border: 1px solid #2d3647;
+      display: none; /* shown via JS */
+    }
+
+    .output-area.visible {
+      display: block;
+    }
+
+    .output-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #8f9eb5;
+      margin-bottom: 0.6rem;
+    }
+
+    .deep-link-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      background: #0f141e;
+      padding: 0.6rem 1rem;
+      border-radius: 1rem;
+    }
+
+    .deep-link-wrap a {
+      color: #b388ff;
+      font-weight: 500;
+      word-break: break-all;
+      text-decoration: none;
+      flex: 1;
+      transition: color 0.15s;
+    }
+
+    .deep-link-wrap a:hover {
+      color: #d68bff;
+      text-decoration: underline;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid #3a4355;
+      color: #c8d0de;
+      padding: 0.4rem 1rem;
+      border-radius: 1.5rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.15s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: #2d3647;
+      border-color: #b388ff;
+      color: #fff;
+    }
+
+    .copy-feedback {
+      font-size: 0.8rem;
+      color: #81c784;
+      margin-left: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .copy-feedback.show {
+      opacity: 1;
+    }
+
+    .note {
+      margin-top: 1.2rem;
+      font-size: 0.8rem;
+      color: #7a8aa0;
+      border-top: 1px solid #2d3647;
+      padding-top: 1rem;
+    }
+
+    .note code {
+      background: #1e2533;
+      padding: 0.1rem 0.5rem;
+      border-radius: 0.4rem;
+      font-size: 0.8rem;
+      color: #d68bff;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 480px) {
+      .card { padding: 1.8rem 1.2rem; }
+      h1 { font-size: 1.5rem; }
+      .deep-link-wrap { flex-direction: column; align-items: stretch; }
+      .copy-btn { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🎯 KovaaK’s Deep Link</h1>
+  <div class="sub">Paste a sharecode or full URL to generate a one‑click launch link</div>
+
+  <div class="input-group">
+    <label for="inputField">Sharecode or URL</label>
+    <input
+      type="text"
+      id="inputField"
+      placeholder="e.g. KovaaKsCallingGearedWipe or https://kovaaks.com/..."
+      value="KovaaKsCallingGearedWipe"
+    />
+  </div>
+
+  <div class="checkbox-row">
+    <input type="checkbox" id="autoOpenCheck" />
+    <label for="autoOpenCheck">
+      ⚡ Auto‑open deep link (launches KovaaK’s immediately)
+    </label>
+  </div>
+
+  <button class="btn" id="generateBtn">Generate Deep Link</button>
+
+  <div class="output-area" id="outputArea">
+    <div class="output-label">🔗 Your deep link (click to open)</div>
+    <div class="deep-link-wrap">
+      <a href="#" id="deepLinkAnchor" target="_blank">steam://run/824270/?action=jump-to-playlist;sharecode=...</a>
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <button class="copy-btn" id="copyBtn">📋 Copy</button>
+        <span class="copy-feedback" id="copyFeedback">✔ Copied!</span>
+      </div>
+    </div>
+    <div class="note">
+      ⚠️ Steam must be running and KovaaK’s installed. The link uses the <code>steam://</code> protocol.
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const inputField = document.getElementById('inputField');
+    const autoOpenCheck = document.getElementById('autoOpenCheck');
+    const generateBtn = document.getElementById('generateBtn');
+    const outputArea = document.getElementById('outputArea');
+    const deepLinkAnchor = document.getElementById('deepLinkAnchor');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyFeedback = document.getElementById('copyFeedback');
+
+    // Helper: extract sharecode from URL or plain text
+    function extractSharecode(raw) {
+      raw = raw.trim();
+      if (!raw) return '';
+
+      // If it looks like a URL, try to parse the search param
+      try {
+        const url = new URL(raw);
+        // Allow both kovaaks.com and other domains (just in case)
+        const search = url.searchParams.get('search');
+        if (search) return search;
+        // Fallback: last path segment if no search param
+        const pathParts = url.pathname.split('/').filter(p => p);
+        return pathParts.length ? pathParts[pathParts.length - 1] : raw;
+      } catch {
+        // Not a valid URL, assume it's already a sharecode
+        return raw;
+      }
+    }
+
+    // Build deep link from sharecode
+    function buildDeepLink(sharecode) {
+      if (!sharecode) return '';
+      return `steam://run/824270/?action=jump-to-playlist;sharecode=${encodeURIComponent(sharecode)}`;
+    }
+
+    // Update UI with the deep link
+    function updateOutput(deepLink, sharecode) {
+      if (deepLink && sharecode) {
+        deepLinkAnchor.href = deepLink;
+        deepLinkAnchor.textContent = deepLink;
+        outputArea.classList.add('visible');
+        // Hide copy feedback
+        copyFeedback.classList.remove('show');
+      } else {
+        outputArea.classList.remove('visible');
+      }
+    }
+
+    // Main action: generate and optionally auto-open
+    function generateDeepLink() {
+      const raw = inputField.value;
+      const sharecode = extractSharecode(raw);
+      const deepLink = buildDeepLink(sharecode);
+
+      if (!sharecode) {
+        alert('Please enter a valid sharecode or URL.');
+        outputArea.classList.remove('visible');
+        return;
+      }
+
+      updateOutput(deepLink, sharecode);
+
+      // If auto-open is checked, attempt to launch the game
+      if (autoOpenCheck.checked) {
+        // Using window.location.href triggers the protocol handler
+        // This is a user gesture (click), so it should work.
+        window.location.href = deepLink;
+        // Optionally show a brief notification
+        // (we can't know if it succeeded, but it's fine)
+      }
+    }
+
+    // Copy deep link to clipboard
+    copyBtn.addEventListener('click', function() {
+      const link = deepLinkAnchor.href;
+      if (!link || link === '#') return;
+      navigator.clipboard.writeText(link).then(() => {
+        copyFeedback.classList.add('show');
+        setTimeout(() => copyFeedback.classList.remove('show'), 2000);
+      }).catch(() => {
+        // Fallback: select and copy using document.execCommand
+        const textArea = document.createElement('textarea');
+        textArea.value = link;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          copyFeedback.classList.add('show');
+          setTimeout(() => copyFeedback.classList.remove('show'), 2000);
+        } catch (e) {
+          alert('Could not copy link. Please copy it manually.');
+        }
+        document.body.removeChild(textArea);
+      });
+    });
+
+    // Generate on button click
+    generateBtn.addEventListener('click', generateDeepLink);
+
+    // Also generate on Enter key in input
+    inputField.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        generateBtn.click();
+      }
+    });
+
+    // Pre‑populate with example and generate on load (so user sees result immediately)
+    // but we'll do it after a tiny delay to let the page render.
+    setTimeout(() => {
+      generateBtn.click();
+    }, 100);
+  })();
+</script>
+</body>
+</html>
